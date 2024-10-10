@@ -6,7 +6,6 @@
 //
 
 import SwiftUI
-
 public struct CircularProgressModel {
     public let strokeWidth: CGFloat
     public let progressColor: Color
@@ -24,44 +23,51 @@ public struct CircularProgressModel {
         self.shouldAnimate = shouldAnimate
     }
 }
-
 public struct CircularProgressBar: View {
-
-    @State private var animatedEndValue: Double = 0
-
+    @State private var animatedEndValue: Double
     private let model: CircularProgressModel
-
     public init(model: CircularProgressModel) {
         self.model = model
+        self._animatedEndValue = State(initialValue: model.startValue)
     }
-
     public var body: some View {
         ZStack {
             Circle()
                 .stroke(
                     model.backgroundColor,
-                    style: StrokeStyle(lineWidth: model.strokeWidth, lineCap: .round))
+                    style: StrokeStyle(
+                        lineWidth: model.strokeWidth,
+                        lineCap: .round
+                    )
+                )
             Circle()
-                .trim(from: model.startValue, to: model.endValue)
+                .trim(from: model.startValue, to: animatedEndValue)
                 .stroke(
                     model.progressColor,
-                    style: StrokeStyle(lineWidth: model.strokeWidth, lineCap: .round))
+                    style: StrokeStyle(
+                        lineWidth: model.strokeWidth,
+                        lineCap: .round
+                    )
+                )
                 .rotationEffect(.degrees(-90))
-                .animation(model.shouldAnimate ? .linear(duration: 1.0) : .none, value: animatedEndValue)
+                .animation(
+                    model.shouldAnimate ? .linear(duration: 0.3) : .none,
+                    value: animatedEndValue
+                )
         }
         .onAppear {
             if model.shouldAnimate {
-                animatedEndValue = model.endValue
+                withAnimation {
+                    animatedEndValue = model.endValue
+                }
             } else {
-                animatedEndValue = model.startValue
+                animatedEndValue = model.endValue
             }
         }
         .padding()
         .frame(maxWidth: 300, maxHeight: 300)
     }
 }
-
-
 #Preview {
     CircularProgressBar(
         model: CircularProgressModel(
@@ -70,7 +76,7 @@ public struct CircularProgressBar: View {
             backgroundColor: Color.pink.opacity(0.5),
             startValue: 0,
             endValue: 0.75,
-            shouldAnimate: true
+            shouldAnimate: true  // Ensure this is true to see animation
         )
     )
 }
